@@ -1,9 +1,14 @@
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import routers
 
 from ads import settings
 from ads_2 import views
+from users.views import LocationViewSet
+
+router = routers.SimpleRouter()  # url для ViewSet
+router.register('location', LocationViewSet)
 
 urlpatterns = [
 
@@ -17,6 +22,8 @@ urlpatterns = [
     path('user/', include('users.urls')),
 
 ]
+
+urlpatterns += router.urls
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

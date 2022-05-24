@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'ads_2',
     'users',
 ]
@@ -134,27 +135,32 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 TOTAL_ON_PAGE = 10
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            # logging handler that outputs log messages to terminal
-            'class': 'logging.StreamHandler',
-            'level': 'DEBUG',  # message level to be written to console
-        },
-    },
-    'loggers': {
-        '': {
-            # this sets root level logger to log debug and higher level logs to console.
-            # All other loggers inherit settings from root level logger.
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,  # this tells logger to send logging message to its parent (will send if set to True)
-        },
-        'django.db': {
-            # django also has database level logging
-            'level': 'DEBUG',
-        },
-    },
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
 }
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             # logging handler that outputs log messages to terminal
+#             'class': 'logging.StreamHandler',
+#             'level': 'DEBUG',  # message level to be written to console
+#         },
+#     },
+#     'loggers': {
+#         '': {
+#             # this sets root level logger to log debug and higher level logs to console.
+#             # All other loggers inherit settings from root level logger.
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': False,  # this tells logger to send logging message to its parent (will send if set to True)
+#         },
+#         'django.db': {
+#             # django also has database level logging
+#             'level': 'DEBUG',
+#         },
+#     },
+# }
