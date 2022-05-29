@@ -21,6 +21,8 @@ urlpatterns = [
 
     path('user/', include('users.urls')),
 
+    path('selection/', include('ads_2.sel_urls')),
+
 ]
 
 urlpatterns += router.urls

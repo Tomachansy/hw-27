@@ -6,9 +6,14 @@ from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
+from rest_framework.generics import DestroyAPIView, ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView
+from rest_framework.permissions import IsAuthenticated
 
 from ads import settings
-from ads_2.models import Category, Ad
+from ads_2.models import Category, Ad, Selection
+from ads_2.permissions import AdUpdatePermission, SelectionUpdatePermission
+from ads_2.serializers import SelectionSerializer, SelectionListSerializer, SelectionDetailSerializer, \
+    AdDetailSerializer, AdSerializer
 from users.models import User
 
 
@@ -103,24 +108,19 @@ class AdView(ListView):
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
 
-        categories = request.GET.getlist("cat", None)
-        if categories:
-            self.object_list = self.object_list.filter(category_id__in=categories)
+        if categories := request.GET.getlist("cat", None):
+            self.object_list = self.object_list.filter(category__in=categories)
 
-        text = request.GET.get("text", None)
-        if text:
+        if text := request.GET.get("text", None):
             self.object_list = self.object_list.filter(name__icontains=text)
 
-        location = request.GET.get("location", None)
-        if location:
+        if location := request.GET.get("location", None):
             self.object_list = self.object_list.filter(author__location_id__name__icontains=location)
 
-        price_from = request.GET.get("price_from", None)
-        if price_from:
+        if price_from := request.GET.get("price_from", None):
             self.object_list = self.object_list.filter(price__gte=price_from)
 
-        price_to = request.GET.get("price_to", None)
-        if price_to:
+        if price_to := request.GET.get("price_to", None):
             self.object_list = self.object_list.filter(price__lte=price_to)
 
         self.object_list = self.object_list.select_related("author").order_by("-price")
@@ -138,7 +138,7 @@ class AdView(ListView):
                 "price": ad.price,
                 "description": ad.description,
                 "is_published": ad.is_published,
-                "category_id": ad.category_id.id,
+                "category": ad.category.id,
                 "image": ad.image.url if ad.image else None,
             })
 
@@ -151,23 +151,10 @@ class AdView(ListView):
         return JsonResponse(response, safe=False, json_dumps_params={"ensure_ascii": False})
 
 
-class AdDetailView(DetailView):
-    model = Ad
-
-    def get(self, request, *args, **kwargs):
-        ad = self.get_object()
-
-        return JsonResponse({
-            "id": ad.id,
-            "name": ad.name,
-            "author_id": ad.author_id,
-            "author": ad.author.first_name,
-            "price": ad.price,
-            "description": ad.description,
-            "is_published": ad.is_published,
-            "category_id": ad.category_id_id,
-            "image": ad.image.url if ad.image else None},
-            safe=False)
+class AdDetailView(RetrieveAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdDetailSerializer
+    permission_classes = [IsAuthenticated]
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -176,7 +163,7 @@ class AdCreateView(CreateView):
         ad_data = json.loads(request.body)
 
         author = get_object_or_404(User, ad_data["author_id"])
-        category = get_object_or_404(Category, ad_data["category_id"])
+        category = get_object_or_404(Category, ad_data["category"])
 
         ad = Ad.objects.create(
             name=ad_data["name"],
@@ -196,51 +183,21 @@ class AdCreateView(CreateView):
             "price": ad.price,
             "description": ad.description,
             "is_published": ad.is_published,
-            "category_id": ad.category_id_id,
+            "category": ad.category_id,
             "image": ad.image.url if ad.image else None},
             safe=False)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class AdUpdateView(UpdateView):
-    model = Ad
-    fields = ["name", "author", "price", "description", "category"]
-
-    def patch(self, request, *args, **kwargs):
-        super().post(request, *args, **kwargs)
-
-        ad_data = json.loads(request.body)
-        self.object.name = ad_data["name"]
-        self.object.price = ad_data["price"]
-        self.object.description = ad_data["description"]
-
-        self.object.author = get_object_or_404(User, ad_data["author_id"])
-        self.object.category = get_object_or_404(Category, ad_data["category_id"])
-
-        self.object.save()
-
-        return JsonResponse({
-            "id": self.object.id,
-            "name": self.object.name,
-            "author_id": self.object.author_id,
-            "author": self.object.author.first_name,
-            "price": self.object.price,
-            "description": self.object.description,
-            "is_published": self.object.is_published,
-            "category_id": self.object.category_id_id,
-            "image": self.object.image.url if self.object.image else None},
-            safe=False)
+class AdUpdateView(UpdateAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdDetailSerializer
+    permission_classes = [IsAuthenticated, AdUpdatePermission]
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class AdDeleteView(DeleteView):
-    model = Ad
-    success_url = "/"
-
-    def delete(self, request, *args, **kwargs):
-        super().delete(request, *args, **kwargs)
-
-        return JsonResponse({"status": "Ok"}, status=200)
+class AdDeleteView(DestroyAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdSerializer
+    permission_classes = [IsAuthenticated, AdUpdatePermission]
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -262,6 +219,34 @@ class AdUploadImageView(UpdateView):
             "price": self.object.price,
             "description": self.object.description,
             "is_published": self.object.is_published,
-            "category_id": self.object.category_id_id,
+            "category": self.object.category_id,
             "image": self.object.image.url if self.object.image else None},
             safe=False)
+
+
+class SelectionListView(ListAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionListSerializer
+
+
+class SelectionRetrieveView(RetrieveAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionDetailSerializer
+
+
+class SelectionCreateView(CreateAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class SelectionUpdateView(UpdateAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionSerializer
+    permission_classes = [IsAuthenticated, SelectionUpdatePermission]
+
+
+class SelectionDestroyView(DestroyAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionSerializer
+    permission_classes = [IsAuthenticated, SelectionUpdatePermission]
