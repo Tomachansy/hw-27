@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
-    'ads_2',
+    'ads',
     'users',
 ]
 
@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'ads.urls'
+ROOT_URLCONF = 'avito.urls'
 
 TEMPLATES = [
     {
@@ -73,7 +73,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'ads.wsgi.application'
+WSGI_APPLICATION = 'avito.wsgi.application'
 
 
 # Database
@@ -147,6 +147,10 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = 'users.User'
+
+USER_MIN_AGE = 9
+
+EMAIL_DOMAIN_CONSTRAINTS = ["rambler.ru"]
 
 # LOGGING = {
 #     'version': 1,

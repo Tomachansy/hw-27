@@ -3,8 +3,8 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 
-from ads import settings
-from ads_2 import views
+from avito import settings
+from ads import views
 from users.views import LocationViewSet
 
 router = routers.SimpleRouter()  # url для ViewSet
@@ -15,13 +15,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.root),
 
-    path('cat/', include('ads_2.cat_urls')),
+    path('cat/', include('ads.cat_urls')),
 
-    path('ad/', include('ads_2.ad_urls')),
+    path('ad/', include('ads.ad_urls')),
 
     path('user/', include('users.urls')),
 
-    path('selection/', include('ads_2.sel_urls')),
+    path('selection/', include('ads.sel_urls')),
 
 ]
 

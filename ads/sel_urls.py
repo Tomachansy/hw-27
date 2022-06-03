@@ -1,6 +1,6 @@
 from django.urls import path
 
-from ads_2 import views
+from ads import views
 
 urlpatterns = [
 

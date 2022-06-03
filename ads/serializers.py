@@ -1,6 +1,18 @@
 from rest_framework import serializers
 
-from ads_2.models import Ad, Selection
+from ads.models import Ad, Selection
+
+
+class NotTrueValidator:
+    def __call__(self, value):
+        if value:
+            raise serializers.ValidationError("New ad cannot be published.")
+
+
+class LettersMoreThan:
+    def __call__(self, value):
+        if len(value) < 9:
+            raise serializers.ValidationError("Name must be at least 9 letters long.")
 
 
 class AdSerializer(serializers.ModelSerializer):
@@ -18,6 +30,15 @@ class AdDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ad
         fields = ["id", "name", "author_id", "author", "price", "description", "is_published", "category_id", "image"]
+
+
+class AdCreateSerializer(serializers.ModelSerializer):
+    is_published = serializers.BooleanField(validators=[NotTrueValidator()])
+    name = serializers.BooleanField(validators=[LettersMoreThan()])
+
+    class Meta:
+        model = Ad
+        fields = '__all__'
 
 
 class SelectionListSerializer(serializers.ModelSerializer):

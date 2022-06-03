@@ -1,6 +1,13 @@
 from rest_framework import serializers
 
+from avito.settings import EMAIL_DOMAIN_CONSTRAINTS
 from users.models import Location, User
+
+
+class EmailValidator:
+    def __call__(self, value):
+        if value.endswith(EMAIL_DOMAIN_CONSTRAINTS):
+            raise serializers.ValidationError(f"{EMAIL_DOMAIN_CONSTRAINTS} users cannot register.")
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -28,6 +35,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
         queryset=Location.objects.all(),
         slug_field="name"
     )
+
+    email = serializers.EmailField(validators=[EmailValidator])
 
     class Meta:
         model = User

@@ -9,11 +9,11 @@ from django.views.generic import DetailView, ListView, CreateView, UpdateView, D
 from rest_framework.generics import DestroyAPIView, ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 
-from ads import settings
-from ads_2.models import Category, Ad, Selection
-from ads_2.permissions import AdUpdatePermission, SelectionUpdatePermission
-from ads_2.serializers import SelectionSerializer, SelectionListSerializer, SelectionDetailSerializer, \
-    AdDetailSerializer, AdSerializer
+from avito import settings
+from ads.models import Category, Ad, Selection
+from ads.permissions import AdUpdatePermission, SelectionUpdatePermission
+from ads.serializers import SelectionSerializer, SelectionListSerializer, SelectionDetailSerializer, \
+    AdDetailSerializer, AdSerializer, AdCreateSerializer
 from users.models import User
 
 
@@ -157,35 +157,9 @@ class AdDetailView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class AdCreateView(CreateView):
-    def post(self, request, *args, **kwargs):
-        ad_data = json.loads(request.body)
-
-        author = get_object_or_404(User, ad_data["author_id"])
-        category = get_object_or_404(Category, ad_data["category"])
-
-        ad = Ad.objects.create(
-            name=ad_data["name"],
-            author=author,
-            price=ad_data["price"],
-            description=ad_data["description"],
-            address=ad_data["address"],
-            is_published=ad_data["is_published"],
-            category=category,
-        )
-
-        return JsonResponse({
-            "id": ad.id,
-            "name": ad.name,
-            "author_id": ad.author_id,
-            "author": ad.author.first_name,
-            "price": ad.price,
-            "description": ad.description,
-            "is_published": ad.is_published,
-            "category": ad.category_id,
-            "image": ad.image.url if ad.image else None},
-            safe=False)
+class AdCreateView(CreateAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdCreateSerializer
 
 
 class AdUpdateView(UpdateAPIView):

@@ -1,7 +1,7 @@
 from django.http import Http404
 from rest_framework import permissions
 
-from ads_2.models import Ad, Selection
+from ads.models import Ad, Selection
 from users.models import User
 
 
@@ -20,7 +20,7 @@ class SelectionUpdatePermission(permissions.BasePermission):
 
 
 class AdUpdatePermission(permissions.BasePermission):
-    message = "Managing others ads not permitted."
+    message = "Managing others avito not permitted."
 
     def has_permission(self, request, view):
         if request.user.role in [User.MODERATOR, User.ADMIN]:

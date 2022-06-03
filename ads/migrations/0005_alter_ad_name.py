@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ads_2', '0004_alter_ad_name_alter_category_name_and_more'),
+        ('ads', '0004_alter_ad_name_alter_category_name_and_more'),
     ]
 
     operations = [

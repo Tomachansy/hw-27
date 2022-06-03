@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('is_published', models.BooleanField(default=False)),
                 ('image', models.ImageField(blank=True, null=True, upload_to='images/')),
                 ('author', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='users.user')),
-                ('category_id', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='ads_2.category')),
+                ('category_id', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='ads.category')),
             ],
             options={
                 'verbose_name': 'Объявление',
