@@ -1,4 +1,4 @@
-import factory
+import factory.django
 
 from ads.models import Category, Ad
 from users.models import User
@@ -16,13 +16,13 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = User
 
     username = factory.Faker("name")
+    email = factory.Faker("email")
 
 
 class AdFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Ad
 
-    name = "nameandsurname"
     category = factory.SubFactory(CategoryFactory)
     author = factory.SubFactory(UserFactory)
     price = 10

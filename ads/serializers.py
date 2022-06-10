@@ -34,7 +34,7 @@ class AdDetailSerializer(serializers.ModelSerializer):
 
 class AdCreateSerializer(serializers.ModelSerializer):
     is_published = serializers.BooleanField(validators=[NotTrueValidator()])
-    name = serializers.BooleanField(validators=[LettersMoreThan()])
+    name = serializers.CharField(validators=[LettersMoreThan()])
 
     class Meta:
         model = Ad
